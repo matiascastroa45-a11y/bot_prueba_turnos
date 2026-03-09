@@ -583,16 +583,13 @@ function submitTurno() {
   SHEET.turnos.push({ nombre:n, servicio:s, fecha:f, horario:h, tel:t, estado:'Pendiente' });
 
   // ✅ Enviar al Google Sheet real
-  fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    body: JSON.stringify({ nombre:n, servicio:s, fecha:f, horario:h, tel:t }),
-    headers: { "Content-Type": "application/json" }
+  // Usamos no-cors porque Apps Script no soporta CORS preflight
+  const params = new URLSearchParams({ nombre:n, servicio:s, fecha:f, horario:h, tel:t });
+  fetch(APPS_SCRIPT_URL + "?" + params.toString(), {
+    method: "GET",
+    mode: "no-cors"
   })
-  .then(r => r.json())
-  .then(data => {
-    if (data.ok) console.log("✅ Turno guardado en Sheet");
-    else console.error("❌ Error al guardar:", data.error);
-  })
+  .then(() => console.log("✅ Turno enviado al Sheet"))
   .catch(err => console.error("❌ Error de red:", err));
 
   const b = document.getElementById('chatBody');
