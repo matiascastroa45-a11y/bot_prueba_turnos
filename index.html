@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -572,8 +573,15 @@ function showTurnoForm() {
   scrollBottom();
 }
 
+// Convierte fecha de yyyy-mm-dd (input HTML) a dd-mm-yyyy (formato del Sheet)
+function formatearFecha(fecha) {
+  const [anio, mes, dia] = fecha.split('-');
+  return `${dia}-${mes}-${anio}`;
+}
+
 // Consulta al Sheet los horarios libres para la fecha elegida
 function cargarHorarios(fecha) {
+  fecha = formatearFecha(fecha);
   const select = document.getElementById('f_horario');
   select.innerHTML = '<option value="">Cargando horarios...</option>';
 
@@ -597,10 +605,11 @@ function cargarHorarios(fecha) {
 function submitTurno() {
   const n = document.getElementById('f_nombre').value.trim();
   const s = document.getElementById('f_servicio').value;
-  const f = document.getElementById('f_fecha').value;
+  const fRaw = document.getElementById('f_fecha').value;
+  const f = formatearFecha(fRaw); // convertir a dd-mm-yyyy
   const h = document.getElementById('f_horario').value;
   const t = document.getElementById('f_tel').value.trim();
-  if (!n||!s||!f||!h||!t) { alert('Completá todos los campos 👆'); return; }
+  if (!n||!s||!fRaw||!h||!t) { alert('Completá todos los campos 👆'); return; }
 
   // Guardar en Sheet local para el demo visual
   SHEET.turnos.push({ nombre:n, servicio:s, fecha:f, horario:h, tel:t, estado:'Pendiente' });
