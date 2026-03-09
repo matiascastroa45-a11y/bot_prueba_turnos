@@ -582,15 +582,32 @@ function submitTurno() {
   // Guardar en Sheet local para el demo visual
   SHEET.turnos.push({ nombre:n, servicio:s, fecha:f, horario:h, tel:t, estado:'Pendiente' });
 
-  // ✅ Enviar al Google Sheet real
-  // Usamos no-cors porque Apps Script no soporta CORS preflight
-  const params = new URLSearchParams({ nombre:n, servicio:s, fecha:f, horario:h, tel:t });
-  fetch(APPS_SCRIPT_URL + "?" + params.toString(), {
-    method: "GET",
-    mode: "no-cors"
-  })
-  .then(() => console.log("✅ Turno enviado al Sheet"))
-  .catch(err => console.error("❌ Error de red:", err));
+  // ✅ Enviar al Google Sheet real via formulario oculto (evita CORS)
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = APPS_SCRIPT_URL;
+  form.target = 'hidden_iframe';
+  const campos = { nombre:n, servicio:s, fecha:f, horario:h, tel:t };
+  Object.entries(campos).forEach(([key, val]) => {
+    const input = document.createElement('input');
+    input.type = 'hidden'; input.name = key; input.value = val;
+    form.appendChild(input);
+  });
+  document.body.appendChild(form);
+  
+  // iframe oculto para que no recargue la página
+  let iframe = document.getElementById('hidden_iframe');
+  if (!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.name = 'hidden_iframe';
+    iframe.id = 'hidden_iframe';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+  }
+  
+  form.submit();
+  document.body.removeChild(form);
+  console.log("✅ Turno enviado al Sheet");
 
   const b = document.getElementById('chatBody');
   const conf = document.createElement('div');
